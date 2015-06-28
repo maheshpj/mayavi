@@ -270,7 +270,8 @@ class Glyph(Component):
             return
         if value:
             mask = self.mask_points
-            tvtk_common.configure_input(mask, inputs[0].outputs[0])
+            self.configure_input(mask, inputs[0].outputs[0])
+            self.configure_connection(self.glyph, mask)
         else:
             self.configure_connection(self.glyph, inputs[0])
 

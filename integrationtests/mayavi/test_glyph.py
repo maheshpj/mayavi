@@ -96,6 +96,7 @@ class TestGlyph(TestCase):
         g.glyph.glyph_source.glyph_position = 'center'
         g.glyph.glyph.vector_mode = 'use_normal'
         g.glyph.glyph.scale_factor = 0.5
+        g.glyph.mask_input_points = False
         g.actor.property.line_width = 1.0
 
         v = VectorCutPlane()
@@ -105,6 +106,8 @@ class TestGlyph(TestCase):
         gs.glyph_source = gs.glyph_list[1]
         script.add_module(v)
         v.implicit_plane.set(normal=(0, 1, 0), origin=(0, 3, 0))
+        glyph.mask_input_points = True
+        glyph.mask_points.set(random_mode=False, on_ratio=1)
 
         v = VectorCutPlane()
         glyph = v.glyph
@@ -113,6 +116,8 @@ class TestGlyph(TestCase):
         gs.glyph_position = 'head'
         script.add_module(v)
         v.implicit_plane.set(normal=(0, 1, 0), origin=(0, -2, 0))
+        glyph.mask_input_points = True
+        glyph.mask_points.set(random_mode=False, on_ratio=4)
 
         # Set the scene to a suitable view.
         self.set_view(s)
@@ -157,6 +162,7 @@ class TestGlyph(TestCase):
         # Load visualization
         script.load_visualization(f)
         s = engine.current_scene
+
         # Set the scene to a suitable view.
         self.set_view(s)
 
@@ -180,9 +186,10 @@ class TestGlyph(TestCase):
         # object from the UI via the right-click menu on the tree
         # view, and pasting the copy back.
         sources1 = copy.deepcopy(sources)
-        s.children[:] = sources
+        s.children[:] = sources1
 
         self.set_view(s)
+
         self.check()
 
         # If we have come this far, we are golden!
