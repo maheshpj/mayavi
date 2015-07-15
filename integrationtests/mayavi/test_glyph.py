@@ -48,6 +48,7 @@ class TestGlyph(TestCase):
         assert g.glyph.glyph.vector_mode == 'use_normal'
         assert g.glyph.glyph.scale_factor == 0.5
         assert g.actor.property.line_width == 1.0
+        assert g.glyph.mask_input_points is False
 
         v = src.children[0].children[2]
         glyph = v.glyph
@@ -55,6 +56,9 @@ class TestGlyph(TestCase):
         assert gs.glyph_position == 'tail'
         assert gs.glyph_source == gs.glyph_list[1]
         assert numpy.allclose(v.implicit_plane.normal,  (0., 1., 0.))
+        assert glyph.mask_input_points is True
+        assert glyph.mask_points.random_mode == 0
+        assert glyph.mask_points.on_ratio == 2
 
         v = src.children[0].children[3]
         glyph = v.glyph
@@ -62,6 +66,9 @@ class TestGlyph(TestCase):
         assert gs.glyph_source == gs.glyph_list[2]
         assert gs.glyph_position == 'head'
         assert numpy.allclose(v.implicit_plane.normal,  (0., 1., 0.))
+        assert glyph.mask_input_points is True
+        assert glyph.mask_points.random_mode == 0
+        assert glyph.mask_points.on_ratio == 4
 
     def test(self):
         self.main()
@@ -107,7 +114,8 @@ class TestGlyph(TestCase):
         script.add_module(v)
         v.implicit_plane.set(normal=(0, 1, 0), origin=(0, 3, 0))
         glyph.mask_input_points = True
-        glyph.mask_points.set(random_mode=False, on_ratio=1)
+        glyph.mask_points.random_mode = False
+        glyph.mask_points.on_ratio = 2
 
         v = VectorCutPlane()
         glyph = v.glyph
@@ -117,7 +125,8 @@ class TestGlyph(TestCase):
         script.add_module(v)
         v.implicit_plane.set(normal=(0, 1, 0), origin=(0, -2, 0))
         glyph.mask_input_points = True
-        glyph.mask_points.set(random_mode=False, on_ratio=4)
+        glyph.mask_points.random_mode = False
+        glyph.mask_points.on_ratio = 4
 
         # Set the scene to a suitable view.
         self.set_view(s)

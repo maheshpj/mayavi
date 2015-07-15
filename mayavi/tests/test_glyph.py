@@ -12,18 +12,20 @@ import unittest
 
 # Local imports.
 from mayavi.core.null_engine import NullEngine
+from tvtk.api import tvtk
 
 # Enthought library imports
 from mayavi.sources.array_source import ArraySource
 from mayavi.modules.outline import Outline
 from mayavi.modules.glyph import Glyph
 from mayavi.modules.vector_cut_plane import VectorCutPlane
+from mayavi.sources.vtk_data_source import VTKDataSource
 
 class TestGlyph(unittest.TestCase):
 
 
     def make_data(self):
-        """Trivial data -- creates an elementatry scalar field and a
+        """Trivial data -- creates an elementary scalar field and a
         constant vector field along the 'x' axis."""
         s = numpy.arange(0.0, 10.0, 0.01)
         s = numpy.reshape(s, (10,10,10))
@@ -75,7 +77,8 @@ class TestGlyph(unittest.TestCase):
         e.add_module(v)
         v.implicit_plane.set(normal=(0, 1, 0), origin=(0, 3, 0))
         glyph.mask_input_points = True
-        glyph.mask_points.set(random_mode=False, on_ratio=1)
+        glyph.mask_points.random_mode = False
+        glyph.mask_points.on_ratio = 1
 
         v = VectorCutPlane()
         glyph = v.glyph
@@ -85,7 +88,8 @@ class TestGlyph(unittest.TestCase):
         e.add_module(v)
         v.implicit_plane.set(normal=(0, 1, 0), origin=(0, -2, 0))
         glyph.mask_input_points = True
-        glyph.mask_points.set(random_mode=False, on_ratio=4)
+        glyph.mask_points.random_mode = False
+        glyph.mask_points.on_ratio = 4
 
         self.g=g
         self.v=v
@@ -117,9 +121,8 @@ class TestGlyph(unittest.TestCase):
         self.assertEqual(numpy.allclose(v.implicit_plane.normal,
                                                     (0., 1., 0.)),True)
         self.assertEqual(glyph.mask_input_points,True)
-        self.assertEqual(glyph.mask_points.get('random_mode')['random_mode'],
-                         0)
-        self.assertEqual(glyph.mask_points.get('on_ratio')['on_ratio'],1)
+        self.assertEqual(glyph.mask_points.random_mode,0)
+        self.assertEqual(glyph.mask_points.on_ratio,1)
 
         v = src.children[0].children[3]
         glyph = v.glyph
@@ -129,9 +132,8 @@ class TestGlyph(unittest.TestCase):
         self.assertEqual(numpy.allclose(v.implicit_plane.normal,
                          (0., 1., 0.)),True)
         self.assertEqual(glyph.mask_input_points,True)
-        self.assertEqual(glyph.mask_points.get('random_mode')['random_mode'],
-                         0)
-        self.assertEqual(glyph.mask_points.get('on_ratio')['on_ratio'],4)
+        self.assertEqual(glyph.mask_points.random_mode,0)
+        self.assertEqual(glyph.mask_points.on_ratio,4)
 
     def test_glyph(self):
         "Test if the test fixture works"
@@ -184,7 +186,7 @@ class TestGlyph(unittest.TestCase):
         # Test if the MayaVi2 visualization can be deep-copied.
 
         # Pop the source object.
-        s =  self.scene
+        s = self.scene
         sources = s.children
         s.children = []
         # Add it back to see if that works without error.
@@ -199,6 +201,37 @@ class TestGlyph(unittest.TestCase):
         sources1 = copy.deepcopy(sources)
         s.children[:] = sources1
         self.check()
+
+    def test_mask_input_points_changed(self):
+        """
+        Test if glyph's mask input points works.
+        """
+
+        e = NullEngine()
+        e.start()
+
+        # The numpy array data.
+        points = numpy.array([[0,-0.5,0], [1.5,0,0], [0,1,0], [0,0,0.5],
+                              [-1,-1.5,0.1], [0,-1, 0.5], [-1, -0.5, 0],
+                              [1,0.8,0]], 'f')
+
+        # The TVTK dataset.
+        mesh = tvtk.PolyData(points=points)
+
+        src = VTKDataSource(data=mesh)
+        e.add_source(src)
+
+        src_points = src.outputs[0].number_of_points
+        self.assertEqual(src_points, 8)
+
+        g = Glyph()
+        e.add_module(g)
+
+        g.glyph.mask_points.on_ratio = 2
+        g.glyph.mask_input_points = True
+
+        glyph_points = g.glyph.mask_points.output.number_of_points
+        self.assertEqual(glyph_points, 4)
 
 if __name__ == '__main__':
     unittest.main()
