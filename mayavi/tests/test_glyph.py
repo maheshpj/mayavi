@@ -12,14 +12,12 @@ import unittest
 
 # Local imports.
 from mayavi.core.null_engine import NullEngine
-from tvtk.api import tvtk
 
 # Enthought library imports
 from mayavi.sources.array_source import ArraySource
 from mayavi.modules.outline import Outline
 from mayavi.modules.glyph import Glyph
 from mayavi.modules.vector_cut_plane import VectorCutPlane
-from mayavi.sources.vtk_data_source import VTKDataSource
 
 class TestGlyph(unittest.TestCase):
 
@@ -203,35 +201,19 @@ class TestGlyph(unittest.TestCase):
         self.check()
 
     def test_mask_input_points_changed(self):
-        """
-        Test if glyph's mask input points works.
-        """
+        """Test if glyph's mask input points works."""
 
-        e = NullEngine()
-        e.start()
-
-        # The numpy array data.
-        points = numpy.array([[0,-0.5,0], [1.5,0,0], [0,1,0], [0,0,0.5],
-                              [-1,-1.5,0.1], [0,-1, 0.5], [-1, -0.5, 0],
-                              [1,0.8,0]], 'f')
-
-        # The TVTK dataset.
-        mesh = tvtk.PolyData(points=points)
-
-        src = VTKDataSource(data=mesh)
-        e.add_source(src)
-
-        src_points = src.outputs[0].number_of_points
-        self.assertEqual(src_points, 8)
-
-        g = Glyph()
-        e.add_module(g)
-
-        g.glyph.mask_points.on_ratio = 2
+        g = self.g
         g.glyph.mask_input_points = True
+        g.glyph.mask_points.on_ratio = 20
+        g.glyph.mask_points.random_mode = 0
+        g.glyph.mask_points.update()
 
-        glyph_points = g.glyph.mask_points.output.number_of_points
-        self.assertEqual(glyph_points, 4)
+        mask_output = g.glyph.mask_points.output.number_of_points
+        glyph_input = g.glyph.glyph.input.number_of_points
+        self.assertEqual(mask_output, 50)
+        self.assertEqual(glyph_input, mask_output)
+
 
 if __name__ == '__main__':
     unittest.main()

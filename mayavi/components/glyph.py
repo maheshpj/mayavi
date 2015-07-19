@@ -274,6 +274,7 @@ class Glyph(Component):
             self.configure_connection(self.glyph, mask)
         else:
             self.configure_connection(self.glyph, inputs[0])
+        self.glyph.update()
 
     def _glyph_type_changed(self, value):
         if self.glyph_type == 'vector':
