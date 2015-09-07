@@ -13,6 +13,7 @@ from tvtk.api import tvtk
 from mayavi.sources.vtk_data_source import VTKDataSource
 from mayavi.modules.outline import Outline
 from mayavi.modules.scalar_cut_plane import ScalarCutPlane
+from mayavi.filters.cell_to_point_data import CellToPointData
 from mayavi.filters.point_to_cell_data import PointToCellData
 from mayavi.filters.triangle_filter import TriangleFilter
 
@@ -65,8 +66,12 @@ class TestCutter(unittest.TestCase):
 
         self.add_common_modules()
 
-    def add_common_modules(self):
+    def add_common_modules(self, stype=0):
         e = self.e
+
+        if stype == 1:
+            filter_cell_to_pointdata = CellToPointData()
+            e.add_filter(filter_cell_to_pointdata)
 
         # Create an outline for the data.
         o = Outline()
@@ -91,6 +96,11 @@ class TestCutter(unittest.TestCase):
     def test_structured(self):
         """Tests if cutter works for structured grid"""
         self.add_common_modules()
+        self.check(generate_triangles=0, no_of_cells=4)
+        self.change_plane()
+        self.check(generate_triangles=1, no_of_cells=7)
+
+        self.add_common_modules(stype=1)
         self.check(generate_triangles=0, no_of_cells=4)
         self.change_plane()
         self.check(generate_triangles=1, no_of_cells=7)
