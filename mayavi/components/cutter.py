@@ -73,3 +73,5 @@ class Cutter(Component):
         self.cutter.cut_function = val
         self.trait_property_changed('cut_function', old, val)
 
+    def _cut_function_changed(self):
+        self.cutter.cut_function.on_trait_change(self.cutter.update, 'normal')
