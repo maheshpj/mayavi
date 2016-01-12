@@ -156,6 +156,36 @@ class TestGlyph(unittest.TestCase):
         g.glyph.mask_input_points = True
         self.check(mask=True)
 
+    def test_proportional_maximum_number_of_points_with_random_mode(self):
+        """Test if masking input points with random mode
+           works with proportional maximum number of points.
+           Tests Issue #83"""
+        s = self.scene
+        src = s.children[0]
+        g = src.children[0].children[1]
+        g.glyph.mask_input_points = True
+
+        mask = g.glyph.mask_points
+        mask.random_mode = 1
+        mask.proportional_maximum_number_of_points = True
+        mask.update()
+        self.check(mask=True, mask_random_mode=True)
+
+    def test_proportional_maximum_number_of_points_without_random_mode(self):
+        """Test if masking input points without random mode
+           works with proportional maximum number of points.
+        """
+        s = self.scene
+        src = s.children[0]
+        g = src.children[0].children[1]
+        g.glyph.mask_input_points = True
+
+        mask = g.glyph.mask_points
+        mask.random_mode = 0
+        mask.proportional_maximum_number_of_points = True
+        mask.update()
+        self.check(mask=True)
+
     def test_components_changed(self):
         """"Test if the modules respond correctly when the components
             are changed."""
