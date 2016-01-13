@@ -172,6 +172,9 @@ class Glyph(Component):
             return
 
         self._mask_input_points_changed(self.mask_input_points)
+        self.mask_points.maximum_number_of_points = \
+            self._find_number_of_points_in_input()
+
         if self.glyph_type == 'vector':
             self._color_mode_changed(self.color_mode)
         else:
@@ -287,3 +290,9 @@ class Glyph(Component):
     def _scene_changed(self, old, new):
         super(Glyph, self)._scene_changed(old, new)
         self.glyph_source.scene = new
+
+    def _find_number_of_points_in_input(self):
+        inp = self.inputs[0].outputs[0]
+        if hasattr(inp, 'update'):
+            inp.update()
+        return inp.number_of_points
